@@ -7,7 +7,9 @@
 import 'package:flutter/material.dart';
 
 import '../models/dependency_result.dart';
+import '../models/windows_system_info.dart';
 import '../services/dependency_checker.dart';
+import '../services/windows_system_info_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,18 +28,29 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 
   final Map<String, DependencyResult?> _results = {};
+  WindowsSystemInfo? _sysInfo;
   bool _isLoading = false;
 
   void _checkDependencies() async {
     setState(() {
       _isLoading = true;
       _results.clear();
+      _sysInfo = null;
     });
 
     final checker = DependencyChecker();
+    final sysInfoService = WindowsSystemInfoService();
     final allDeps = _groups.values.expand((element) => element).toList();
 
     // Fire off all futures and update state dynamically when each returns.
+    final sysInfoFuture = sysInfoService.getSystemInfo().then((info) {
+      if (mounted) {
+        setState(() {
+          _sysInfo = info;
+        });
+      }
+    }).catchError((_) {});
+
     final futures = allDeps.map((dep) {
       return checker.checkDependency(dep).then((res) {
         if (mounted) {
@@ -50,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     // Support batch execution using Future.wait
-    await Future.wait(futures);
+    await Future.wait([sysInfoFuture, ...futures]);
 
     if (mounted) {
       setState(() {
@@ -93,31 +106,31 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
+      body: ListView(
         padding: const EdgeInsets.all(16.0),
-        itemCount: _groups.keys.length,
-        itemBuilder: (context, index) {
-          final groupName = _groups.keys.elementAt(index);
-          final deps = _groups[groupName]!;
-
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16.0),
-            elevation: 2,
-            child: ExpansionTile(
-              initiallyExpanded: true,
-              shape: const Border(),
-              collapsedShape: const Border(),
-              title: Text(
-                groupName,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+        children: [
+          _buildSysInfoCard(),
+          ..._groups.keys.map((groupName) {
+            final deps = _groups[groupName]!;
+            return Card(
+              margin: const EdgeInsets.only(bottom: 16.0),
+              elevation: 2,
+              child: ExpansionTile(
+                initiallyExpanded: true,
+                shape: const Border(),
+                collapsedShape: const Border(),
+                title: Text(
+                  groupName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
+                children: deps.map((dep) => _buildDependencyRow(dep)).toList(),
               ),
-              children: deps.map((dep) => _buildDependencyRow(dep)).toList(),
-            ),
-          );
-        },
+            );
+          }),
+        ],
       ),
     );
   }
@@ -206,6 +219,99 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildSysInfoCard() {
+    final computerName = _sysInfo?.computerName ?? 'Unknown';
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16.0),
+      elevation: 2,
+      child: ExpansionTile(
+        initiallyExpanded: true,
+        shape: const Border(),
+        collapsedShape: const Border(),
+        title: Text(
+          'System Info - $computerName',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _buildCompactSysInfoItem('OS Name', _sysInfo?.osName, _sysInfo?.osName != 'Unknown Windows')),
+                    Expanded(child: _buildCompactSysInfoItem('OS Version', _sysInfo != null ? '${_sysInfo!.osVersion}' : null, _sysInfo?.osVersion != 'Unknown')),
+                    Expanded(child: _buildCompactSysInfoItem('RAM', _sysInfo != null ? '${_sysInfo!.totalRamGB} GB' : null, (_sysInfo?.totalRamGB ?? 0) > 0)),
+                  ],
+                ),
+                const Divider(height: 24),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _buildCompactSysInfoItem('CPU', _sysInfo?.cpuModel, _sysInfo?.cpuModel != 'Unknown CPU')),
+                    Expanded(child: _buildCompactSysInfoItem('Architecture', _sysInfo != null ? (_sysInfo!.is64Bit ? '64-bit' : '32-bit') : null, true)),
+                    Expanded(child: _buildCompactSysInfoItem('Cores', _sysInfo != null ? '${_sysInfo!.numberOfCores}' : null, (_sysInfo?.numberOfCores ?? 0) > 0)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactSysInfoItem(String title, String? value, bool isSuccess) {
+    Widget icon;
+    if (_sysInfo == null) {
+      if (_isLoading) {
+        icon = const SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        );
+      } else {
+        icon = const Icon(Icons.help_outline, color: Colors.grey, size: 16);
+      }
+    } else if (isSuccess) {
+      icon = const Icon(Icons.check_circle, color: Colors.green, size: 16);
+    } else {
+      icon = const Icon(Icons.cancel, color: Colors.red, size: 16);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            icon,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _sysInfo == null ? 'Pending...' : (value ?? 'N/A'),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: _sysInfo != null && !isSuccess ? Colors.red : null,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
