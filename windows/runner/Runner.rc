@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "dependency_checker" "\0"
+            VALUE "CompanyName", "Ruturaj Patki" "\0"
+            VALUE "FileDescription", "A modular Flutter Desktop tool for Windows that verifies the presence and versioning of common development toolchains." "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "dependency_checker" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "dependency_checker.exe" "\0"
-            VALUE "ProductName", "dependency_checker" "\0"
+            VALUE "InternalName", "Framework Diagnostic Tool" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Ruturaj Patki. All rights reserved." "\0"
+            VALUE "OriginalFilename", "Framework Diagnostic Tool.exe" "\0"
+            VALUE "ProductName", "Framework Diagnostic Tool by Ruturaj" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dependency Checker'),
+        title: const Text('Framework Diagnostic Tool'),
         actions: [
           if (_isLoading)
             const Padding(

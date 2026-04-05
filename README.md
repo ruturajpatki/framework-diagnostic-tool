@@ -1,5 +1,7 @@
 # Framework Diagnostic Tool
 
+![Framework Diagnostic Tool Screenshot](docs/images/demo-screen.png)
+
 A modular Flutter Desktop tool for Windows that verifies the presence and versioning of common development toolchains.
 
 ## Purpose
