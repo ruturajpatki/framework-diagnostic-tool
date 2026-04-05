@@ -1,4 +1,11 @@
+/**
+ * Project Name: Framework Diagnostic Tool
+ * Purpose: Application entry point and root widget configuration.
+ * Author: Ruturaj Patki
+ */
+
 import 'package:flutter/material.dart';
+
 import 'ui/home_screen.dart';
 
 void main() {

@@ -1,4 +1,11 @@
+/**
+ * Project Name: Framework Diagnostic Tool
+ * Purpose: Data model for representing the result of a dependency check.
+ * Author: Ruturaj Patki
+ */
+
 class DependencyResult {
+
   final String name;
   final bool isInstalled;
   final String version;

@@ -1,4 +1,11 @@
+/**
+ * Project Name: Framework Diagnostic Tool
+ * Purpose: Main user interface for displaying and triggering dependency checks.
+ * Author: Ruturaj Patki
+ */
+
 import 'package:flutter/material.dart';
+
 import '../models/dependency_result.dart';
 import '../services/dependency_checker.dart';
 

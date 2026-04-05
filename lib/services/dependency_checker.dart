@@ -1,4 +1,11 @@
+/**
+ * Project Name: Framework Diagnostic Tool
+ * Purpose: Service class for executing shell commands and parsing dependency versions.
+ * Author: Ruturaj Patki
+ */
+
 import 'dart:io';
+
 import '../models/dependency_result.dart';
 
 class DependencyChecker {
