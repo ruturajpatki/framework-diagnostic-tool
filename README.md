@@ -34,10 +34,8 @@ flutter doctor
 ```
 
 ### 2. Installation
-Clone the repository and fetch the dependencies:
+Clone the repository. Once done, go to the folder where you cloned the repo and fetch the dependencies.
 ```powershell
-git clone <your-repo-url>
-cd dependency_checker
 flutter pub get
 ```
 
